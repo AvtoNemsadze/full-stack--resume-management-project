@@ -53,7 +53,7 @@ namespace Backend.Controllers
         // not finished ???
         [HttpPut]
         [Route("Update/{id}")]
-        public async Task<IActionResult> UpdateCandidate(long id, [FromForm] CandidateCreateDto dto, IFormFile pdfFile)
+        public async Task<IActionResult> UpdateCandidate(long id, [FromForm] CandidateUpdateDto dto, IFormFile pdfFile)
         {
             var existingCandidate = await _context.Candidates.FindAsync(id);
 

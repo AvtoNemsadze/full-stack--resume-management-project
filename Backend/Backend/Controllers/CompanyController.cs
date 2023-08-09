@@ -2,6 +2,7 @@
 using Backend.Core.Context;
 using Backend.Core.Dtos.Company;
 using Backend.Core.Entities;
+using Backend.Core.Entities.Log;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +20,7 @@ namespace Backend.Controllers
             _context = context;
             _mapper = mapper;
         }
+
 
         [HttpPost]
         [Route("Create")]
@@ -43,7 +45,7 @@ namespace Backend.Controllers
 
         [HttpPut]
         [Route("Update/{id}")]
-        public async Task<IActionResult> UpdateCompany(long id, [FromBody] CompanyCreateDto dto)
+        public async Task<IActionResult> UpdateCompany(long id, [FromBody] CompanyUpdateDto dto)
         {
             var existingCompany = await _context.Companies.FindAsync(id);
 
@@ -52,8 +54,22 @@ namespace Backend.Controllers
                 return NotFound("Company not found");
             }
 
+            CompanyUpdateLog updateLog = new()
+            {
+                CompanyId = existingCompany.ID,
+                CompanyName = existingCompany.Name,
+                UpdatedName = dto.Name,
+                CompanySize = existingCompany.Size.ToString(),
+                UpdatedSize = dto.Size.ToString(),
+                Message = $"company with name '{existingCompany.Name}' updated",
+                UpdatedTime = DateTime.Now
+            };
+
             existingCompany.Name = dto.Name;
             existingCompany.Size = dto.Size;
+
+            _context.CompanyUpdateLogs.Add(updateLog);
+
             await _context.SaveChangesAsync();
 
             return Ok("Company updated successfully");
@@ -69,12 +85,23 @@ namespace Backend.Controllers
             {
                 return NotFound("Companies not found");
             }
+
+            CompanyDeleteLog deleteLog = new()
+            {
+                CompanyId = existingCompanies.ID,
+                CompanyName = existingCompanies.Name,
+                CompanySize = existingCompanies.Size.ToString(),
+                Message = $"company with name {existingCompanies.Name} deleted from table",
+                DeletedTime = DateTime.Now
+            };
+
+            _context.CompanyDeleteLogs.Add(deleteLog);
             _context.Companies.Remove(existingCompanies);
+
             await _context.SaveChangesAsync();
 
             return Ok("Company Deleted Successfully");
         }
-
 
     }
 }

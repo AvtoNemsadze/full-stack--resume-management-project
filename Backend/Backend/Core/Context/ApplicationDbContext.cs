@@ -1,4 +1,5 @@
 ﻿using Backend.Core.Entities;
+using Backend.Core.Entities.Log;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Core.Context
@@ -12,6 +13,9 @@ namespace Backend.Core.Context
         public DbSet<Company> Companies { get; set; }
         public DbSet<Job> Jobs { get; set; }
         public DbSet<Candidate> Candidates { get; set; }
+        public DbSet<CompanyDeleteLog> CompanyDeleteLogs { get; set; }
+        public DbSet<CompanyUpdateLog> CompanyUpdateLogs { get; set; }
+        public DbSet<JobDeleteLog> JobDeleteLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -28,8 +32,8 @@ namespace Backend.Core.Context
                 .HasForeignKey(candidate => candidate.JobId);
 
             modelBuilder.Entity<Company>()
-             .Property(company => company.Size)
-             .HasConversion<string>();
+                .Property(company => company.Size)
+                .HasConversion<string>();
 
             modelBuilder.Entity<Job>()
                .Property(job => job.Level)

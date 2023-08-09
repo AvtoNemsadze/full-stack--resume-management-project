@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
 using Backend.Core.Context;
-using Backend.Core.Dtos.Company;
 using Backend.Core.Dtos.Job;
 using Backend.Core.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Backend.Core.Entities.Log;
 
 namespace Backend.Controllers
 {
@@ -44,7 +44,7 @@ namespace Backend.Controllers
 
         [HttpPut]
         [Route("Update/{id}")]
-        public async Task<IActionResult> UpdateJob(long id, [FromBody] JobCreateDto dto)
+        public async Task<IActionResult> UpdateJob(long id, [FromBody] JobUpdateDto dto)
         {
             var existingJob = await _context.Jobs.FindAsync(id);
 
@@ -65,12 +65,25 @@ namespace Backend.Controllers
         [Route("Delete/{id}")]
         public async Task<IActionResult> DeleteJob(long id)
         {
-            var existingJob = await _context.Jobs.FindAsync(id);
+            var existingJob = await _context.Jobs.Include(j => j.Company).FirstOrDefaultAsync(j => j.ID == id);
 
             if (existingJob == null)
             {
                 return NotFound("Job not found");
             }
+
+            JobDeleteLog jobDeleteLog = new()
+            {
+               JobId = existingJob.ID,
+               CompanyId = existingJob.CompanyId,
+               JobTitle = existingJob.Title,
+               JobLevel = existingJob.Level.ToString(),
+               Message = $"Job with title {existingJob.Title} deleted from table",
+               CompanyName = existingJob.Company.Name,
+               DeletedTime = DateTime.Now
+            };
+
+            _context.JobDeleteLogs.Add(jobDeleteLog);
             _context.Jobs.Remove(existingJob);
             await _context.SaveChangesAsync();
 
