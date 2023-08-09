@@ -50,7 +50,6 @@ namespace Backend.Controllers
         }
 
 
-        // not finished ???
         [HttpPut]
         [Route("Update/{id}")]
         public async Task<IActionResult> UpdateCandidate(long id, [FromForm] CandidateUpdateDto dto, IFormFile pdfFile)
@@ -84,7 +83,7 @@ namespace Backend.Controllers
                 existingCandidate.ResumeUrl = resumeUrl;
             }
 
-            // Update other fields
+            
             if (!string.IsNullOrEmpty(dto.FirstName))
             {
                 existingCandidate.FirstName = dto.FirstName;
